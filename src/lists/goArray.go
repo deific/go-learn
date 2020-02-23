@@ -1,4 +1,4 @@
-package _type
+package lists
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ func ReverseArray(srcArray []string) []string {
 	count := len(srcArray)
 	var resultArray = make([]string, count)
 	for i := 0; i < len(srcArray); i++ {
-		resultArray[i] = srcArray[count-i]
+		resultArray[i] = srcArray[count-i-1]
 	}
 	return resultArray
 }
