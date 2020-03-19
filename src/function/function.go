@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"runtime"
 	"strings"
 )
 
@@ -24,6 +25,12 @@ func main() {
 	testStructInterface()
 	// 方法实现接口
 	testFunctionInterface()
+
+	// 闭包
+	testClosure()
+
+	// panic 和 recover
+	testRecoverFunction()
 
 }
 
@@ -129,4 +136,68 @@ func testFunctionInterface() {
 		fmt.Println("testFunctionInterface", p)
 	})
 	invoker.Call("hello")
+}
+
+// 匿名函数可以用于闭包
+func Accmulate(value int) func() int {
+	return func() int {
+		value++
+		return value
+	}
+}
+
+func testClosure() {
+	accmulator := Accmulate(1)
+	// 累计加一
+	fmt.Println(accmulator())
+	fmt.Println(accmulator())
+	fmt.Println(accmulator())
+	fmt.Printf("%p\n", accmulator)
+
+	accmulator2 := Accmulate(20)
+	fmt.Println(accmulator())
+	fmt.Println(accmulator2())
+	fmt.Printf("%p\n", accmulator2)
+}
+
+// panic和recover
+type panicContext struct {
+	function string
+}
+
+// 保护函数
+func protectMan(entry func()) {
+
+	defer func() {
+		// 发生宕机时，获取panic上下文并打印
+		err := recover()
+		switch err.(type) {
+		case runtime.Error:
+			fmt.Println("runtime error:", err)
+		default:
+			fmt.Println("error:", err)
+		}
+	}()
+
+	entry()
+}
+
+// 异常恢复
+func testRecoverFunction() {
+	fmt.Println("被保护程序，如果发生宕机会由保护程序恢复程序，类似try-catch机制")
+	fmt.Println("运行前")
+	protectMan(func() {
+		// 手动宕机异常
+		fmt.Println("手动宕机前")
+		panic(&panicContext{"手动触发宕机"})
+		fmt.Println("手动宕机后")
+	})
+
+	protectMan(func() {
+		fmt.Println("空指针赋值前")
+		var a *int
+		*a = 1
+		fmt.Println("空指针赋值后")
+	})
+	fmt.Println("运行后")
 }
